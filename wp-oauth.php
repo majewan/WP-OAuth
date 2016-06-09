@@ -407,7 +407,8 @@ Class WPOA {
 		$query_result = $wpdb->get_var($query_string);
 		//print_r( $query_result ); exit;
 		// attempt to get a wordpress user with the matched id:
-		$user = get_user_by('id', $query_result);
+    $user = get_user_by('id', $query_result);
+    $user = apply_filters( 'wpoa/match_wordpress_user', $user, $oauth_identity);
 		return $user;
 	}
 	

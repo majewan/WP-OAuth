@@ -13,9 +13,9 @@ define('CLIENT_ID', get_option('wpoa_oauth_server_api_id'));
 define('CLIENT_SECRET', get_option('wpoa_oauth_server_api_secret'));
 define('REDIRECT_URI', rtrim(site_url(), '/') . '/');
 define('SCOPE', 'profile'); // PROVIDER SPECIFIC: 'profile' is the minimum scope required to get the user's id from Google
-define('URL_AUTH', get_option('wpoa_oauth_server_api_endpoint') . "?oauth=authorize&");
-define('URL_TOKEN', get_option('wpoa_oauth_server_api_endpoint') . "?oauth=token&");
-define('URL_USER', get_option('wpoa_oauth_server_api_endpoint') . "?oauth=me&");
+define('URL_AUTH', get_option('wpoa_oauth_server_api_endpoint') . "/authorize?");
+define('URL_TOKEN', get_option('wpoa_oauth_server_api_endpoint') . "/access_token?");
+define('URL_USER', get_option('wpoa_oauth_server_api_endpoint') . "/me");
 # END OF DEFINE THE OAUTH PROVIDER AND SETTINGS TO USE #
 
 // remember the user's last url so we can redirect them back to there after the login ends:
@@ -170,13 +170,13 @@ function get_oauth_identity($wpoa) {
 	// perform the http request:
 	switch (strtolower(HTTP_UTIL)) {
 		case 'curl':
-			$url = URL_USER . $url_params;
+			$url = URL_USER;
 			$response = wp_remote_get($url, array(
 				'timeout' => 45,
 				'redirection' => 5,
 				'httpversion' => '1.0',
 				'blocking' => true,
-				'headers' => array(),
+				'headers' => array('Authorization' => $_SESSION['WPOA']['ACCESS_TOKEN']),
 				'sslverify' => false
 			));
 			$result_obj = json_decode( $response['body'], true );
@@ -201,13 +201,12 @@ function get_oauth_identity($wpoa) {
 	// parse and return the user's oauth identity:
 	$oauth_identity = array();
 	$oauth_identity['provider'] = $_SESSION['WPOA']['PROVIDER'];
-	$oauth_identity['id'] = $result_obj['ID']; // PROVIDER SPECIFIC: Google returns the user's OAuth identity as id
-	
-	// print_r( $oauth_identity ); exit;
-	// $oauth_identity['email'] = $result_obj['emails'][0]['value']; // PROVIDER SPECIFIC: Google returns an array of email addresses. To respect privacy we currently don't collect the user's email address.
+  $oauth_identity['id'] = $result_obj['id']; // PROVIDER SPECIFIC: Google returns the user's OAuth identity as id
+
 	if (!$oauth_identity['id']) {
 		$wpoa->wpoa_end_login("Sorry, we couldn't log you in. User identity was not found. Please notify the admin or try again later.");
-	}
+  }
+	$oauth_identity = array_merge($result_obj, $oauth_identity);
 	return $oauth_identity;
 }
 # END OF AUTHENTICATION FLOW HELPER FUNCTIONS #
