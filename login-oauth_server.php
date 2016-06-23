@@ -15,7 +15,7 @@ define('REDIRECT_URI', rtrim(site_url(), '/') . '/');
 define('SCOPE', 'profile'); // PROVIDER SPECIFIC: 'profile' is the minimum scope required to get the user's id from Google
 define('URL_AUTH', get_option('wpoa_oauth_server_api_endpoint') . "/authorize?");
 define('URL_TOKEN', get_option('wpoa_oauth_server_api_endpoint') . "/access_token?");
-define('URL_USER', get_option('wpoa_oauth_server_api_endpoint') . "/me");
+define('URL_USER', get_option('wpoa_oauth_server_api_endpoint') . "/profile");
 # END OF DEFINE THE OAUTH PROVIDER AND SETTINGS TO USE #
 
 // remember the user's last url so we can redirect them back to there after the login ends:
@@ -174,9 +174,9 @@ function get_oauth_identity($wpoa) {
 			$response = wp_remote_get($url, array(
 				'timeout' => 45,
 				'redirection' => 5,
-				'httpversion' => '1.0',
+				'httpversion' => '1.1',
 				'blocking' => true,
-				'headers' => array('Authorization' => $_SESSION['WPOA']['ACCESS_TOKEN']),
+				'headers' => array('Authorization' => 'Bearer ' . $_SESSION['WPOA']['ACCESS_TOKEN']),
 				'sslverify' => false
 			));
 			$result_obj = json_decode( $response['body'], true );
