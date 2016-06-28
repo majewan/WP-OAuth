@@ -107,6 +107,7 @@ function get_oauth_token($wpoa) {
 	$url_params = http_build_query($params);
 	//print_r($url_params); exit;
 	switch (strtolower(HTTP_UTIL)) {
+		default:
 		case 'curl':
 			//print 'Curl'; exit;
 			$url = URL_TOKEN . $url_params;
@@ -169,6 +170,7 @@ function get_oauth_identity($wpoa) {
 	$url_params = http_build_query($params);
 	// perform the http request:
 	switch (strtolower(HTTP_UTIL)) {
+		default:
 		case 'curl':
 			$url = URL_USER;
 			$response = wp_remote_get($url, array(
